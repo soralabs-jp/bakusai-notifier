@@ -1,0 +1,21 @@
+{
+  "name": "bakusai-notifier",
+  "version": "0.1.0",
+  "description": "Small Playwright-based notifier for Bakusai thread series.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "check": "node --check src/main.js && node --check src/fetchThread.js && node --check src/parseThread.js && node --check src/detectNextThread.js && node --check src/notifyDiscord.js && node --check src/storage.js"
+  },
+  "keywords": [
+    "bakusai",
+    "playwright",
+    "discord",
+    "notifier"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "playwright": "^1.55.0"
+  }
+}

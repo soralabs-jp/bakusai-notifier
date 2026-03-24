@@ -1,0 +1,61 @@
+﻿name: Bakusai Watch
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: bakusai-watch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      THREAD_URL: ${{ secrets.THREAD_URL }}
+      WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      SERIES_NAME: ${{ secrets.SERIES_NAME }}
+      BAKUSAI_SEARCH_URL_TEMPLATE: ${{ secrets.BAKUSAI_SEARCH_URL_TEMPLATE }}
+      STATE_FILE: ./data/state.json
+      HEADLESS: true
+      INITIAL_BOOT_NOTIFY: false
+      INCLUDE_POST_SNIPPETS: false
+      PLAYWRIGHT_TIMEOUT_MS: 30000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run notifier
+        run: node src/main.js
+
+      - name: Commit updated state
+        run: |
+          if git diff --quiet -- data/state.json; then
+            echo "No state changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/state.json
+          git commit -m "chore: update bakusai state [skip ci]"
+          git push
