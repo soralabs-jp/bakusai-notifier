@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "bakusai-notifier",
   "version": "0.1.0",
-  "description": "Small Playwright-based notifier for Bakusai thread series.",
+  "description": "爆サイ通知 - Playwright-based notifier for Bakusai thread series.",
   "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js",

@@ -1,4 +1,4 @@
-﻿name: Bakusai Watch
+﻿name: 爆サイ通知
 
 on:
   schedule:
@@ -12,7 +12,7 @@ on:
         type: boolean
 
 concurrency:
-  group: bakusai-watch
+  group: bakusai-notify
   cancel-in-progress: false
 
 permissions:
@@ -67,3 +67,4 @@ jobs:
           git add data/state.json
           git commit -m "chore: update bakusai state [skip ci]"
           git push
+

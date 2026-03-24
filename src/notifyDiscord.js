@@ -1,4 +1,4 @@
-﻿function createNotifier({ webhookUrl, username = 'bakusai-notifier' }) {
+﻿function createNotifier({ webhookUrl, username = '爆サイ通知' }) {
   async function sendMessage(content) {
     if (!webhookUrl) {
       console.warn('[notify] WEBHOOK_URL is not set; skipping Discord notification');
@@ -77,3 +77,4 @@
 module.exports = {
   createNotifier
 };
+
