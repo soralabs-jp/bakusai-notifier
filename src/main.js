@@ -16,6 +16,8 @@ const CONFIG = {
   headless: process.env.HEADLESS !== 'false',
   initialBootNotify: process.env.INITIAL_BOOT_NOTIFY === 'true',
   includePostSnippets: process.env.INCLUDE_POST_SNIPPETS === 'true',
+  forceTestNotify: process.env.FORCE_TEST_NOTIFY === 'true',
+  runSource: process.env.RUN_SOURCE || '',
   playwrightTimeoutMs: Number(process.env.PLAYWRIGHT_TIMEOUT_MS || 30000),
   searchUrlTemplate:
     process.env.BAKUSAI_SEARCH_URL_TEMPLATE ||
@@ -134,6 +136,15 @@ async function run() {
   assertConfig();
 
   const notifier = createNotifier({ webhookUrl: CONFIG.webhookUrl });
+
+  if (CONFIG.forceTestNotify) {
+    await notifier.notifyTest({
+      source: CONFIG.runSource || 'manual',
+      threadUrl: CONFIG.threadUrl
+    });
+    log('Test notification sent');
+  }
+
   const state = await loadState(CONFIG.stateFile);
 
   if (!state?.currentThread?.url) {

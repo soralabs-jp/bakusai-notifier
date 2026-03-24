@@ -15,6 +15,7 @@
 - 状態を `data/state.json` に保存
 - エラー時にログ出力しつつ Discord Webhook へ通知
 - GitHub Actions 実行後に `data/state.json` を自動コミットして継続利用
+- 手動実行時だけ Discord テスト通知を送信可能
 
 ## ファイル構成
 
@@ -98,6 +99,10 @@ node src/main.js
 
 GitHub Actions は毎回クリーンな環境で動くため、実行後に `data/state.json` が更新されていれば自動コミットしてリポジトリへ push します。変更が無いときはコミットしません。
 
+### 5. Discord テスト通知
+
+GitHub の `Actions` タブから `Bakusai Watch` を `Run workflow` するときに `test_notify` をオンにすると、監視処理の前に 1 回だけテスト通知を送ります。
+
 ## GitHub Actions の注意点
 
 - GitHub Actions の `schedule` は厳密に 5 分ちょうどではなく、少し遅れることがあります。
@@ -109,7 +114,7 @@ GitHub Actions は毎回クリーンな環境で動くため、実行後に `dat
 
 ## 手動実行方法
 
-GitHub 上で手動実行したい場合は `Actions` タブから `Bakusai Watch` を開き、`Run workflow` を押してください。
+GitHub 上で手動実行したい場合は `Actions` タブから `Bakusai Watch` を開き、`Run workflow` を押してください。Webhook 疎通だけ確認したいときは `test_notify` をオンにします。
 
 ローカルで手動実行したい場合は従来どおり次です。
 
@@ -128,10 +133,18 @@ node src/main.js
 - `HEADLESS`: `false` にするとブラウザを表示
 - `INITIAL_BOOT_NOTIFY`: 初回保存時にも通知するか
 - `INCLUDE_POST_SNIPPETS`: 新着通知に本文らしき抜粋を少し入れるか
+- `FORCE_TEST_NOTIFY`: `true` なら監視前に Discord テスト通知を送る
+- `RUN_SOURCE`: 実行元をテスト通知に含めるための補助値
 - `PLAYWRIGHT_TIMEOUT_MS`: ページ取得タイムアウト
 - `BAKUSAI_SEARCH_URL_TEMPLATE`: 次スレ探索用 URL テンプレート。`{query}` にシリーズ名を入れる
 
 ## 通知例
+
+```text
+🧪 Discordテスト通知
+実行元: workflow_dispatch
+THREAD_URL: https://...
+```
 
 ```text
 📨 新着投稿: 3件

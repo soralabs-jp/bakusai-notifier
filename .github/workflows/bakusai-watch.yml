@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+    inputs:
+      test_notify:
+        description: 'Send a Discord test message before monitoring'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: bakusai-watch
@@ -26,6 +32,8 @@ jobs:
       INITIAL_BOOT_NOTIFY: false
       INCLUDE_POST_SNIPPETS: false
       PLAYWRIGHT_TIMEOUT_MS: 30000
+      FORCE_TEST_NOTIFY: ${{ github.event_name == 'workflow_dispatch' && inputs.test_notify && 'true' || 'false' }}
+      RUN_SOURCE: ${{ github.event_name }}
 
     steps:
       - name: Checkout repository

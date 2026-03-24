@@ -1,4 +1,4 @@
-function createNotifier({ webhookUrl, username = 'bakusai-notifier' }) {
+﻿function createNotifier({ webhookUrl, username = 'bakusai-notifier' }) {
   async function sendMessage(content) {
     if (!webhookUrl) {
       console.warn('[notify] WEBHOOK_URL is not set; skipping Discord notification');
@@ -23,6 +23,16 @@ function createNotifier({ webhookUrl, username = 'bakusai-notifier' }) {
   }
 
   return {
+    async notifyTest({ source, threadUrl }) {
+      const lines = [
+        '🧪 Discordテスト通知',
+        source ? `実行元: ${source}` : null,
+        threadUrl ? `THREAD_URL: ${threadUrl}` : null
+      ];
+
+      await sendMessage(lines.filter(Boolean).join('\n'));
+    },
+
     async notifyNewPosts({ diffCount, thread, latestResNo, snippets = [] }) {
       const lines = [
         `📨 新着投稿: ${diffCount}件`,
