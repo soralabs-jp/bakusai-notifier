@@ -1,4 +1,4 @@
-const { normalizeSeriesName } = require('./parseThread');
+﻿const { normalizeSeriesName } = require('./parseThread');
 
 function buildSearchUrl(seriesName, template) {
   if (!seriesName || !template) {
@@ -8,9 +8,23 @@ function buildSearchUrl(seriesName, template) {
   return template.replace('{query}', encodeURIComponent(seriesName));
 }
 
+function isSameSeries(currentThread, candidate) {
+  const normalizedCurrentSeries = normalizeSeriesName(currentThread?.seriesName);
+  const normalizedCandidateSeries = normalizeSeriesName(candidate?.seriesName);
+
+  if (!normalizedCurrentSeries || !normalizedCandidateSeries) {
+    return false;
+  }
+
+  return (
+    normalizedCandidateSeries === normalizedCurrentSeries ||
+    normalizedCandidateSeries.includes(normalizedCurrentSeries) ||
+    normalizedCurrentSeries.includes(normalizedCandidateSeries)
+  );
+}
+
 function pickNextThreadCandidate(currentThread, currentCandidates = [], searchCandidates = []) {
   const all = [...currentCandidates, ...searchCandidates];
-  const normalizedCurrentSeries = normalizeSeriesName(currentThread.seriesName);
   let best = null;
 
   for (const candidate of all) {
@@ -18,27 +32,19 @@ function pickNextThreadCandidate(currentThread, currentCandidates = [], searchCa
       continue;
     }
 
-    if (currentThread.threadNo && candidate.threadNo <= currentThread.threadNo) {
+    if (!currentThread?.threadNo) {
       continue;
     }
 
-    const normalizedCandidateSeries = normalizeSeriesName(candidate.seriesName);
-    if (
-      normalizedCurrentSeries &&
-      normalizedCandidateSeries &&
-      normalizedCandidateSeries !== normalizedCurrentSeries &&
-      !normalizedCandidateSeries.includes(normalizedCurrentSeries) &&
-      !normalizedCurrentSeries.includes(normalizedCandidateSeries)
-    ) {
+    if (candidate.threadNo !== currentThread.threadNo + 1) {
       continue;
     }
 
-    const score =
-      (candidate.score || 0) +
-      (currentThread.threadNo && candidate.threadNo === currentThread.threadNo + 1 ? 100 : 0) +
-      (currentThread.threadNo && candidate.threadNo > currentThread.threadNo
-        ? 20 - Math.min(candidate.threadNo - currentThread.threadNo, 20)
-        : 0);
+    if (!isSameSeries(currentThread, candidate)) {
+      continue;
+    }
+
+    const score = (candidate.score || 0) + 100;
 
     if (!best || score > best.score) {
       best = {
@@ -60,7 +66,7 @@ function shouldSwitchThread(currentThread, nextCandidate) {
     return false;
   }
 
-  return nextCandidate.threadNo > currentThread.threadNo;
+  return nextCandidate.threadNo === currentThread.threadNo + 1 && isSameSeries(currentThread, nextCandidate);
 }
 
 module.exports = {

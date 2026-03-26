@@ -44,7 +44,15 @@ function buildThreadState(thread) {
   return {
     title: thread.title,
     url: thread.url,
-    threadNo: thread.threadNo
+    threadNo: thread.threadNo,
+    seriesName: thread.seriesName || ''
+  };
+}
+
+function buildCurrentThreadContext(state, parsedThread) {
+  return {
+    ...(state.currentThread || {}),
+    seriesName: state.currentThread?.seriesName || state.seriesName || parsedThread.seriesName || ''
   };
 }
 
@@ -155,6 +163,7 @@ async function run() {
 
   const threadUrl = state.currentThread.url || CONFIG.threadUrl;
   const parsedThread = await fetchAndParseThread(threadUrl);
+  const currentThread = buildCurrentThreadContext(state, parsedThread);
   const lastSeenResNo = Number(state.lastSeenResNo || 0);
 
   if (parsedThread.latestResNo && parsedThread.latestResNo > lastSeenResNo) {
@@ -170,11 +179,11 @@ async function run() {
     await notifier.notifyReachedMax({ thread: parsedThread });
   }
 
-  let nextCandidate = pickNextThreadCandidate(state.currentThread, parsedThread.nextThreadCandidates, []);
+  let nextCandidate = pickNextThreadCandidate(currentThread, parsedThread.nextThreadCandidates, []);
 
   if (!nextCandidate && parsedThread.seriesName) {
     const searchCandidates = await searchNextThreadCandidates(parsedThread.seriesName);
-    nextCandidate = pickNextThreadCandidate(state.currentThread, parsedThread.nextThreadCandidates, searchCandidates);
+    nextCandidate = pickNextThreadCandidate(currentThread, parsedThread.nextThreadCandidates, searchCandidates);
   }
 
   if (nextCandidate && nextCandidate.url !== state.nextThreadCandidateUrl) {
@@ -192,9 +201,9 @@ async function run() {
     updatedAt: new Date().toISOString()
   };
 
-  if (shouldSwitchThread(state.currentThread, nextCandidate)) {
+  if (shouldSwitchThread(currentThread, nextCandidate)) {
     await notifier.notifySwitchedThread({
-      fromThread: state.currentThread,
+      fromThread: currentThread,
       toThread: nextCandidate
     });
 
