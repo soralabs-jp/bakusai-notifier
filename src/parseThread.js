@@ -1,4 +1,4 @@
-function cleanTitle(rawTitle) {
+﻿function cleanTitle(rawTitle) {
   return String(rawTitle || '')
     .replace(/\s*[|｜].*$/, '')
     .replace(/\s+-\s+爆サイ\.com\s*$/i, '')
@@ -142,7 +142,7 @@ function parseThread(snapshot, options = {}) {
     url: snapshot.finalUrl || snapshot.requestedUrl,
     latestResNo,
     resNumbers,
-    reachedMax: latestResNo === 1000 || /\b1000\b/.test(snapshot.bodyText || ''),
+    reachedMax: latestResNo === 1000,
     nextThreadCandidates,
     snippets: options.includePostSnippets ? extractPostSnippets(snapshot.bodyText, latestResNo) : [],
     debug: snapshot.debug || {}
