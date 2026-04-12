@@ -2,7 +2,7 @@
 
 爆サイの特定スレシリーズを監視し、新着レスがあったときだけ Discord に通知する小さい監視ツールです。読むのは爆サイ本体で行う前提なので、独自ビューアや履歴画面はありません。
 
-ローカル単発実行に加えて、GitHub Actions で 5 分おきの自動監視にも対応しています。
+ローカル単発実行に加えて、GAS の 5 分定期実行から GitHub Actions を起動する自動監視にも対応しています。
 
 ## できること
 
@@ -66,9 +66,9 @@ node src/main.js
 
 初回は `data/state.json` がまだ無いので、現在の最新レス番号を保存して終了します。`INITIAL_BOOT_NOTIFY=true` のときだけ初回通知します。
 
-## GitHub Actions で常時監視する方法
+## GAS から GitHub Actions を起動して常時監視する方法
 
-このリポジトリには `.github/workflows/bakusai-watch.yml` を追加してあります。ワークフロー名は `爆サイ通知` です。GitHub に push すると、GitHub Actions から 5 分おきに監視できます。
+このリポジトリには `.github/workflows/bakusai-watch.yml` を追加してあります。ワークフロー名は `爆サイ通知` です。GAS の時間主導トリガーから GitHub API の `workflow_dispatch` を呼ぶことで、5 分おきに監視できます。
 
 ### 1. 必要な Secrets を設定する
 
@@ -84,28 +84,94 @@ node src/main.js
 - `SERIES_NAME`: タイトル解析が不安定なときにシリーズ名を固定したい場合
 - `BAKUSAI_SEARCH_URL_TEMPLATE`: 板や地域ごとに検索 URL を調整したい場合
 
-### 2. ワークフローを有効にする
+### 2. GitHub Personal Access Token を作る
+
+GAS から GitHub API を呼ぶために Personal Access Token を作成します。
+
+必要権限の目安:
+
+- Fine-grained token の場合: 対象リポジトリに対して `Actions: write`
+- Classic token の場合: `repo`
+
+作成したトークンは GAS のスクリプトプロパティへ保存します。
+
+### 3. GAS を設定する
+
+Apps Script で次のようなスクリプトを用意します。
+
+```javascript
+function triggerBakusaiWatch() {
+  const owner = 'YOUR_GITHUB_OWNER';
+  const repo = 'bakusai-notifier';
+  const workflowId = 'bakusai-watch.yml';
+  const ref = 'main';
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+
+  if (!token) {
+    throw new Error('Script property GITHUB_TOKEN is not set.');
+  }
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`;
+  const payload = {
+    ref,
+    inputs: {
+      test_notify: 'false'
+    }
+  };
+
+  const response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+  const body = response.getContentText();
+
+  Logger.log(`GitHub API response: ${code} ${body}`);
+
+  if (code < 200 || code >= 300) {
+    throw new Error(`GitHub API error: ${code} ${body}`);
+  }
+}
+```
+
+続けて次を設定します。
+
+- `Project Settings` → `Script properties` に `GITHUB_TOKEN` を追加
+- `トリガー` から `triggerBakusaiWatch` に 5 分おきの時間主導トリガーを設定
+
+### 4. ワークフローの起動方法
 
 ワークフローは次の 2 パターンで動きます。
 
-- `schedule`: 5 分おき自動実行
-- `workflow_dispatch`: GitHub 画面から手動実行
+- GAS からの定期起動: GitHub API 経由で `workflow_dispatch` を実行
+- GitHub 画面からの手動実行: `workflow_dispatch`
 
-### 3. 初回実行の挙動
+### 5. 初回実行の挙動
 
 初回は `data/state.json` に基準値を保存して終了します。2 回目以降の実行から差分通知が始まります。
 
-### 4. state.json の永続化
+### 6. state.json の永続化
 
 GitHub Actions は毎回クリーンな環境で動くため、実行後に `data/state.json` が更新されていれば自動コミットしてリポジトリへ push します。変更が無いときはコミットしません。
 
-### 5. Discord テスト通知
+### 7. Discord テスト通知
 
 GitHub の `Actions` タブから `爆サイ通知` を `Run workflow` するときに `test_notify` をオンにすると、監視処理の前に 1 回だけテスト通知を送ります。
 
-## GitHub Actions の注意点
+## GAS + GitHub Actions の注意点
 
-- GitHub Actions の `schedule` は厳密に 5 分ちょうどではなく、少し遅れることがあります。
+- 定期実行の時計は GAS 側が持つため、GitHub Actions の `schedule` 遅延は避けられます。
+- ただし GitHub Actions 側のキュー待ちや Playwright 実行時間までは短縮されません。
+- GAS 側で GitHub token を安全に保管する必要があります。
+- `workflow_dispatch` を使うため、GitHub token は workflow 起動権限を持っている必要があります。
 - 初回実行時は通知せず基準値だけ保存する想定です。
 - `data/state.json` は監視状態を保持するため、リポジトリ管理対象です。
 - ワークフローは `concurrency` を設定しているので、前回実行中に次回が重なっても暴走しにくくしています。
