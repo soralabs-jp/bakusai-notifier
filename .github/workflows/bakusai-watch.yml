@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: bakusai-notify
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write

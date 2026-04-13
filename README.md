@@ -174,7 +174,7 @@ GitHub の `Actions` タブから `爆サイ通知` を `Run workflow` すると
 - `workflow_dispatch` を使うため、GitHub token は workflow 起動権限を持っている必要があります。
 - 初回実行時は通知せず基準値だけ保存する想定です。
 - `data/state.json` は監視状態を保持するため、リポジトリ管理対象です。
-- ワークフローは `concurrency` を設定しているので、前回実行中に次回が重なっても暴走しにくくしています。
+- ワークフローは `concurrency` を設定しているので、同時実行は防ぎつつ、新しい起動が来たら古い実行を止めて置き換えます。
 - Playwright のブラウザセットアップを毎回行います。
 - エラー時は `DISCORD_WEBHOOK_URL` が設定されていれば Discord へ通知します。
 
