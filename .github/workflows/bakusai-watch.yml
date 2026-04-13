@@ -63,12 +63,27 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/state.json
-          git commit -m "chore: update bakusai state [skip ci]"
 
           for attempt in 1 2 3; do
             echo "Push attempt $attempt"
-            git pull --rebase origin main && git push && exit 0
+            temp_state="$(mktemp)"
+            cp data/state.json "$temp_state"
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            cp "$temp_state" data/state.json
+            rm -f "$temp_state"
+
+            if git diff --quiet -- data/state.json; then
+              echo "No state changes after syncing with origin"
+              exit 0
+            fi
+
+            git add data/state.json
+            git commit -m "chore: update bakusai state [skip ci]" && git push && exit 0
+
+            git reset --hard HEAD
             sleep 10
           done
 
