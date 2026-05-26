@@ -1,4 +1,4 @@
-﻿name: 爆サイ通知
+name: 爆サイ通知
 
 on:
   workflow_dispatch:
