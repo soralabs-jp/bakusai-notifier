@@ -1,13 +1,13 @@
 {
   "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ",
   "currentThread": {
-    "title": "五反田 ピンサロ MarineSurprise マリンサプライズ 42",
-    "url": "https://bakusai.com/thr_res/acode=3/ctgid=103/bid=412/tid=13401609/ttgid=213/p=1/",
-    "threadNo": 42,
+    "title": "五反田 ピンサロ MarineSurprise マリンサプライズ 43",
+    "url": "https://bakusai.com/thr_res/acode=3/ctgid=103/bid=412/tid=13481615",
+    "threadNo": 43,
     "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ"
   },
-  "lastSeenResNo": 1000,
-  "reachedMaxNotified": true,
+  "lastSeenResNo": null,
+  "reachedMaxNotified": false,
   "nextThreadCandidateUrl": null,
   "knownThreads": [
     {
@@ -51,7 +51,13 @@
       "url": "https://bakusai.com/thr_res/acode=3/ctgid=103/bid=412/tid=13401609/ttgid=213/p=1/",
       "threadNo": 42,
       "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ"
+    },
+    {
+      "title": "五反田 ピンサロ MarineSurprise マリンサプライズ 43",
+      "url": "https://bakusai.com/thr_res/acode=3/ctgid=103/bid=412/tid=13481615",
+      "threadNo": 43,
+      "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ"
     }
   ],
-  "updatedAt": "2026-09-14T01:48:43.910Z"
+  "updatedAt": "2026-09-14T01:53:35.150Z"
 }
