@@ -6,8 +6,8 @@
     "threadNo": 42,
     "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ"
   },
-  "lastSeenResNo": 999,
-  "reachedMaxNotified": false,
+  "lastSeenResNo": 1000,
+  "reachedMaxNotified": true,
   "nextThreadCandidateUrl": null,
   "knownThreads": [
     {
@@ -53,5 +53,5 @@
       "seriesName": "五反田 ピンサロ MarineSurprise マリンサプライズ"
     }
   ],
-  "updatedAt": "2026-09-14T01:43:33.609Z"
+  "updatedAt": "2026-09-14T01:48:43.910Z"
 }
